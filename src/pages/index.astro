@@ -175,6 +175,7 @@ const slides = await getSlides();
       if (slide.slideType === 'team') return (
         <section class="slide slide--team" id={anchorId}>
           <div class="slide__content slide__content--team">
+            {slide.heading && <div class="team-header"><h2 class="slide__heading">{slide.heading}</h2></div>}
             <div class="team-grid">
               <div class="team-card">
                 <div class="team-card__header">
@@ -402,7 +403,7 @@ const slides = await getSlides();
   .slide__content--dark .slide__heading { text-shadow: none; }
   .slide__lede {
     font-size: clamp(1rem, 2vw, 1.25rem);
-    font-weight: 300;
+    font-weight: 600;
     line-height: 1.6;
     max-width: 600px;
     margin: 0 auto 2rem;
@@ -476,12 +477,13 @@ const slides = await getSlides();
   }
   .service-icon svg { width: 100%; height: 100%; }
   .service-card__heading { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.75rem; }
-  .service-card__desc { font-size: 0.9rem; line-height: 1.7; opacity: 0.85; }
+  .service-card__desc { font-size: 0.9rem; line-height: 1.7; opacity: 0.85; text-align: left;}
 
   /* ── PORTFOLIO SLIDE ── */
   .slide--portfolio { background: white; }
   .slide__content--portfolio { max-width: 1100px; }
   .portfolio-header { text-align: center; margin-bottom: 2rem; }
+  .team-header { text-align: center; margin-bottom: 2rem; }
   .portfolio-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);

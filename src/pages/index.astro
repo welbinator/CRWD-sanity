@@ -680,6 +680,16 @@ const slides = await getSlides();
     .slide__content--contact { grid-template-columns: 1fr; gap: 2rem; }
     .form-row { grid-template-columns: 1fr; }
     .slide-dots { display: none; }
+
+    /* Allow slides to grow taller than viewport on mobile and scroll internally */
+    .slide {
+      height: auto;
+      min-height: 100vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      position: absolute;
+      -webkit-overflow-scrolling: touch;
+    }
   }
 </style>
 

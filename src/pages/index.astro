@@ -268,7 +268,7 @@ const slides = await getSlides();
   <!-- ── SLIDE DOTS ── -->
   <nav class="slide-dots" id="slideDots" aria-label="Slide navigation">
     {slides.map((slide: any, i: number) => (
-      <button class={`dot${i === 0 ? ' dot--active' : ''}`} data-slide={i} aria-label={`Slide ${i + 1}: ${slide.title}`}></button>
+      <button class={`dot${i === 0 ? ' dot--active' : ''}`} data-slide={i} aria-label={`Slide ${i + 1}: ${slide.title}`} aria-pressed={i === 0 ? "true" : "false"}></button>
     ))}
   </nav>
 
@@ -701,7 +701,10 @@ const slides = await getSlides();
     const nextSlide = slides[current] as HTMLElement;
     nextSlide?.classList.add('slide--active');
     nextSlide?.removeAttribute('inert');
-    dots.forEach((d, i) => d.classList.toggle('dot--active', i === current));
+    dots.forEach((d, i) => {
+      d.classList.toggle('dot--active', i === current);
+      d.setAttribute('aria-pressed', String(i === current));
+    });
     setTimeout(() => { isAnimating = false; }, 650);
   }
 

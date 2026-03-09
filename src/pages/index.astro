@@ -708,9 +708,30 @@ const slides = await getSlides();
     setTimeout(() => { isAnimating = false; }, 650);
   }
 
+  // After goTo(), move focus to the first focusable element in the new slide
+  // so keyboard users continue naturally from there instead of looping the dots
+  function focusSlide(index: number) {
+    const slide = slides[index] as HTMLElement;
+    if (!slide) return;
+    const focusable = slide.querySelector<HTMLElement>(
+      'a[href], button:not([disabled]), input, textarea, select, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusable) {
+      focusable.focus();
+    } else {
+      // No focusable element in slide — return focus to header logo
+      (document.querySelector<HTMLElement>('.header-logo') as HTMLElement)?.focus();
+    }
+  }
+
   // Dot clicks
   dots.forEach(dot => {
-    dot.addEventListener('click', () => goTo(Number(dot.dataset.slide)));
+    dot.addEventListener('click', () => {
+      const idx = Number(dot.dataset.slide);
+      goTo(idx);
+      // Small delay to let slide transition start before moving focus
+      setTimeout(() => focusSlide(idx), 50);
+    });
   });
 
   // Keyboard
@@ -756,6 +777,8 @@ const slides = await getSlides();
         // close mobile nav
         nav.classList.remove('nav--open');
         burger.setAttribute('aria-expanded', 'false');
+        // Move focus into the new slide
+        setTimeout(() => focusSlide(idx), 50);
       }
     });
   });

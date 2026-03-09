@@ -17,12 +17,14 @@ const {
     <meta name="description" content={description} />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href="/assets/images/Cedar-Rapids-Web-Design_Logo_300x40.svg" />
-    <!-- Font Awesome -->
+    <!-- Font Awesome (defer = non-blocking) -->
     <script defer crossorigin="anonymous" src="https://kit.fontawesome.com/942301eaec.js"></script>
-    <!-- Google Fonts: Roboto -->
+    <!-- Google Fonts: Roboto — load async to avoid render blocking -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" /></noscript>
   </head>
   <body>
     <slot />

@@ -24,9 +24,6 @@ const slides = await getSlides();
           <li><a href="#portfolio" class="nav__link">Portfolio</a></li>
           <li><a href="#team" class="nav__link">Team</a></li>
           <li><a href="#contact-us" class="nav__link">Contact Us</a></li>
-          <li><a href="/blog" class="nav__link">Blog</a></li>
-          <li><a href="/podcast" class="nav__link">Podcast</a></li>
-          <li><a href="/videos" class="nav__link">Videos</a></li>
         </ul>
       </nav>
       <button class="burger" id="burger" aria-label="Open Navigation" aria-expanded="false">
@@ -56,7 +53,7 @@ const slides = await getSlides();
           )}
           <div class="slide-video-placeholder"></div>
           <div class="slide__content hero__content">
-            <img src="/assets/images/Cedar-Rapids-Web-Design_Logo_500-1.svg" alt="Cedar Rapids Web Design" class="hero__logo" />
+            <img src="/assets/images/Cedar-Rapids-Web-Design_Logo_500-1.svg" alt="Cedar Rapids Web Design" class="hero__logo" fetchpriority="high" />
             {slide.heading && <h1 class="hero__tagline">{slide.heading}</h1>}
             {slide.subheading && <p class="hero__sub">{slide.subheading}</p>}
             {slide.ctas?.length > 0 && (

@@ -32,8 +32,8 @@ const slides = await getSlides();
     </div>
   </header>
 
-  <!-- ── SLIDESHOW WRAPPER ── -->
-  <div class="slideshow" id="slideshow">
+  <!-- ── SECTIONS ── -->
+  <div class="sections" id="sections">
 
     {slides.map((slide: any) => {
       const anchorId = slide.anchorId ?? slide._id;
@@ -260,28 +260,14 @@ const slides = await getSlides();
       return null;
     })}
 
-  </div><!-- end .slideshow -->
+  </div><!-- end .sections -->
 
-  <!-- ── MOBILE ARROWS ── -->
-  <div class="mobile-arrows">
-    <button class="mobile-arrow" id="prevBtn" aria-label="Previous slide">&#8592;</button>
-    <button class="mobile-arrow" id="nextBtn" aria-label="Next slide">&#8594;</button>
-  </div>
-
-  <!-- ── SLIDE DOTS ── -->
-  <nav class="slide-dots" id="slideDots" aria-label="Slide navigation">
-    {slides.map((slide: any, i: number) => (
-      <button class={`dot${i === 0 ? ' dot--active' : ''}`} data-slide={i} aria-label={`Slide ${i + 1}: ${slide.title}`} aria-pressed={i === 0 ? "true" : "false"}></button>
-    ))}
-  </nav>
-
-<script id="slide-ids-data" type="application/json" set:html={JSON.stringify(slides.map((s: any) => s.anchorId ?? s._id))}></script>
 </Layout>
 
 <style is:global>
   /* ── RESET / BASE ── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; overflow: hidden; font-family: 'Roboto', sans-serif; background: #000; color: #fff; }
+  html, body { font-family: 'Roboto', sans-serif; background: #000; color: #fff; scroll-behavior: smooth; }
 
   /* ── HEADER ── */
   .header {
@@ -334,20 +320,16 @@ const slides = await getSlides();
   .burger[aria-expanded="true"] .burger__lines::before { transform: rotate(45deg) translate(5px, 5px); }
   .burger[aria-expanded="true"] .burger__lines::after { transform: rotate(-45deg) translate(5px, -5px); }
 
-  /* ── SLIDESHOW ── */
-  .slideshow {
-    position: fixed;
-    inset: 0;
-    width: 100vw;
-    height: 100vh;
+  /* ── SECTIONS WRAPPER ── */
+  .sections {
+    width: 100%;
   }
 
-  /* ── SLIDES ── */
+  /* ── SLIDES (now normal stacked sections) ── */
   .slide {
-    position: absolute;
-    inset: 0;
-    width: 100vw;
-    height: 100vh;
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -355,12 +337,17 @@ const slides = await getSlides();
     padding-top: 70px;
     isolation: isolate;
     opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.6s ease;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
   }
-  .slide.slide--active {
+  .slide.slide--visible {
     opacity: 1;
-    pointer-events: all;
+    transform: translateY(0);
+  }
+  /* First slide visible immediately (no fade-in wait) */
+  .slide:first-child {
+    opacity: 1;
+    transform: translateY(0);
   }
 
   /* Video bg */
@@ -606,61 +593,8 @@ const slides = await getSlides();
   .form-group input:focus,
   .form-group textarea:focus { outline: none; border-color: #e63946; }
 
-  /* ── SLIDE DOTS ── */
-  .slide-dots {
-    position: fixed;
-    right: 1.5rem;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 200;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    background-color: #000;
-    padding: .35rem;
-    border-radius: 7px;
-  }
-  .dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.8);
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    transition: background 0.3s, transform 0.2s;
-  }
-  .dot:hover { background: rgba(255,255,255,0.7); }
-  .dot--active { background: #e63946; transform: scale(1.3); }
-
-  /* ── MOBILE ARROWS ── */
-  .mobile-arrows {
-    display: none;
-    position: fixed;
-    bottom: 1.5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 200;
-    gap: 1rem;
-  }
-  .mobile-arrow {
-    background: rgba(255,255,255,0.15);
-    border: 1px solid rgba(255,255,255,0.3);
-    color: #fff;
-    width: 48px; height: 48px;
-    border-radius: 50%;
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    backdrop-filter: blur(4px);
-    transition: background 0.2s;
-  }
-  .mobile-arrow:hover { background: rgba(230,57,70,0.7); }
-
   /* ── MOBILE NAV ── */
   @media (max-width: 768px) {
-    .mobile-arrows { display: flex; }
     .nav {
       position: fixed;
       top: 70px; left: 0; right: 0;
@@ -679,137 +613,43 @@ const slides = await getSlides();
     .team-grid { grid-template-columns: 1fr; }
     .slide__content--contact { grid-template-columns: 1fr; gap: 2rem; }
     .form-row { grid-template-columns: 1fr; }
-    .slide-dots { display: none; }
-
-    /* Allow slides to grow taller than viewport on mobile and scroll internally */
-    .slide {
-      height: auto;
-      min-height: 100vh;
-      overflow-y: auto;
-      overflow-x: hidden;
-      position: absolute;
-      -webkit-overflow-scrolling: touch;
-    }
   }
 </style>
 
 <script>
-  // ── SLIDESHOW ENGINE ──
-  const slides = document.querySelectorAll<HTMLElement>('.slide');
-  const dots = document.querySelectorAll<HTMLButtonElement>('.dot');
-  let current = 0;
-  let isAnimating = false;
-  const SLIDE_COUNT = slides.length;
-
-  // Set first slide active, mark others as inert (removes from tab order)
-  slides[0]?.classList.add('slide--active');
-  slides.forEach((slide, i) => { if (i !== 0) (slide as HTMLElement).setAttribute('inert', ''); });
-
-  function goTo(index: number) {
-    if (isAnimating || index === current) return;
-    isAnimating = true;
-    const prevSlide = slides[current] as HTMLElement;
-    prevSlide?.classList.remove('slide--active');
-    prevSlide?.setAttribute('inert', '');
-    current = Math.max(0, Math.min(index, SLIDE_COUNT - 1));
-    const nextSlide = slides[current] as HTMLElement;
-    nextSlide?.classList.add('slide--active');
-    nextSlide?.removeAttribute('inert');
-    dots.forEach((d, i) => {
-      d.classList.toggle('dot--active', i === current);
-      d.setAttribute('aria-pressed', String(i === current));
+  // ── FADE-IN ON SCROLL ──
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('slide--visible');
+        observer.unobserve(entry.target);
+      }
     });
-    setTimeout(() => { isAnimating = false; }, 650);
-  }
+  }, { threshold: 0.15 });
 
-  // After goTo(), move focus to the first focusable element in the new slide
-  // so keyboard users continue naturally from there instead of looping the dots
-  function focusSlide(index: number) {
-    const slide = slides[index] as HTMLElement;
-    if (!slide) return;
-    const focusable = slide.querySelector<HTMLElement>(
-      'a[href], button:not([disabled]), input, textarea, select, [tabindex]:not([tabindex="-1"])'
-    );
-    if (focusable) {
-      focusable.focus();
+  document.querySelectorAll<HTMLElement>('.slide').forEach((slide, i) => {
+    if (i === 0) {
+      slide.classList.add('slide--visible'); // first section always visible
     } else {
-      // No focusable element in slide — return focus to header logo
-      (document.querySelector<HTMLElement>('.header-logo') as HTMLElement)?.focus();
+      observer.observe(slide);
     }
-  }
-
-  // Dot clicks
-  dots.forEach(dot => {
-    dot.addEventListener('click', () => {
-      const idx = Number(dot.dataset.slide);
-      goTo(idx);
-      // Small delay to let slide transition start before moving focus
-      setTimeout(() => focusSlide(idx), 50);
-    });
   });
 
-  // Keyboard
-  document.addEventListener('keydown', (e: KeyboardEvent) => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
-    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1);
-  });
+  // ── NAV ANCHOR LINKS (smooth scroll + close mobile nav) ──
+  const burger = document.getElementById('burger') as HTMLButtonElement;
+  const nav = document.getElementById('nav') as HTMLElement;
 
-  // Wheel / trackpad
-  let wheelCooldown = false;
-  document.addEventListener('wheel', (e: WheelEvent) => {
-    if (wheelCooldown) return;
-    wheelCooldown = true;
-    if (e.deltaX > 30 || e.deltaY > 30) goTo(current + 1);
-    if (e.deltaX < -30 || e.deltaY < -30) goTo(current - 1);
-    setTimeout(() => { wheelCooldown = false; }, 800);
-  }, { passive: true });
-
-  // Touch / swipe
-  let touchStartX = 0;
-  let touchStartY = 0;
-  document.addEventListener('touchstart', (e: TouchEvent) => {
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-  }, { passive: true });
-  document.addEventListener('touchend', (e: TouchEvent) => {
-    const dx = e.changedTouches[0].clientX - touchStartX;
-    const dy = e.changedTouches[0].clientY - touchStartY;
-    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
-      dx < 0 ? goTo(current + 1) : goTo(current - 1);
-    }
-  }, { passive: true });
-
-  // Nav anchor links
-  const slideIds = JSON.parse(document.getElementById('slide-ids-data')?.textContent ?? '[]');
   document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach(a => {
     a.addEventListener('click', (e: Event) => {
       const hash = (a.getAttribute('href') ?? '').replace('#', '');
-      const idx = slideIds.indexOf(hash);
-      if (idx !== -1) {
+      const target = document.getElementById(hash);
+      if (target) {
         e.preventDefault();
-        goTo(idx);
-        // close mobile nav
+        target.scrollIntoView({ behavior: 'smooth' });
         nav.classList.remove('nav--open');
         burger.setAttribute('aria-expanded', 'false');
-        // Move focus into the new slide
-        setTimeout(() => focusSlide(idx), 50);
       }
     });
-  });
-
-  // Mobile arrows
-  document.getElementById('prevBtn')?.addEventListener('click', () => goTo(current - 1));
-  document.getElementById('nextBtn')?.addEventListener('click', () => goTo(current + 1));
-
-  // ── FOCUS-DRIVEN SLIDE NAVIGATION (accessibility) ──
-  // When a keyboard user tabs to a focusable element on a non-active slide,
-  // automatically jump to that slide so the screen follows focus.
-  document.getElementById('slideshow')?.addEventListener('focusin', (e: Event) => {
-    const target = e.target as HTMLElement;
-    const parentSlide = target.closest<HTMLElement>('.slide');
-    if (!parentSlide) return;
-    const idx = Array.from(slides).indexOf(parentSlide);
-    if (idx !== -1 && idx !== current) goTo(idx);
   });
 
   // ── CONTACT FORM ──
@@ -843,8 +683,6 @@ const slides = await getSlides();
   });
 
   // ── MOBILE BURGER ──
-  const burger = document.getElementById('burger') as HTMLButtonElement;
-  const nav = document.getElementById('nav') as HTMLElement;
   burger.addEventListener('click', () => {
     const isOpen = burger.getAttribute('aria-expanded') === 'true';
     burger.setAttribute('aria-expanded', String(!isOpen));

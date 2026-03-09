@@ -1,0 +1,43 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getAllVideos } from '../../lib/sanity';
+
+const videos = await getAllVideos();
+---
+
+<Layout title="Videos — Cedar Rapids Web Design">
+  <div class="content-page">
+    <header class="content-page__header">
+      <a href="/" class="back-link">← Back to Home</a>
+      <h1>YouTube Videos</h1>
+      <p>Tutorials, walkthroughs, and web design tips from our YouTube channel.</p>
+    </header>
+    <div class="content-grid">
+      {videos.map((video: any) => (
+        <a href={`/videos/${video.slug.current}`} class="content-card">
+          {video.youtubeId && (
+            <div class="content-card__thumb">
+              <img src={`https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`} alt={video.title} class="content-card__img" />
+              <div class="content-card__play">▶</div>
+            </div>
+          )}
+          <div class="content-card__body">
+            <div class="content-card__meta">
+              <span class="content-card__date">{video.publishedAt ? new Date(video.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Draft'}</span>
+            </div>
+            <h2 class="content-card__title">{video.title}</h2>
+            {video.excerpt && <p class="content-card__excerpt">{video.excerpt}</p>}
+            <span class="content-card__read-more">Watch Now →</span>
+          </div>
+        </a>
+      ))}
+      {videos.length === 0 && (
+        <p class="content-empty">No videos yet. Check back soon!</p>
+      )}
+    </div>
+  </div>
+</Layout>
+
+<style is:global>
+  @import '/src/styles/content-pages.css';
+</style>

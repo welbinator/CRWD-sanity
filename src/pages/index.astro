@@ -1,0 +1,770 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getSiteSettings, getSlides } from '../lib/sanity';
+
+export const prerender = false;
+
+const settings = await getSiteSettings();
+const phone = settings?.phone ?? '319.360.5541';
+const phoneUrl = settings?.phoneUrl ?? 'tel:3193605541';
+const slides = await getSlides();
+---
+
+<Layout>
+  <!-- ── HEADER ── -->
+  <header class="header">
+    <div class="header-container">
+      <a href="/" class="header-logo">
+        <img src="/assets/images/Cedar-Rapids-Web-Design_Logo_300x40.svg" alt="Cedar Rapids Web Design" />
+      </a>
+      <nav class="nav" id="nav">
+        <ul class="nav__list">
+          <li><a href="#hero" class="nav__link">Home</a></li>
+          <li><a href="#services" class="nav__link">Services</a></li>
+          <li><a href="#portfolio" class="nav__link">Portfolio</a></li>
+          <li><a href="#team" class="nav__link">Team</a></li>
+          <li><a href="#contact-us" class="nav__link">Contact Us</a></li>
+          <li><a href="/blog" class="nav__link">Blog</a></li>
+          <li><a href="/podcast" class="nav__link">Podcast</a></li>
+          <li><a href="/videos" class="nav__link">Videos</a></li>
+        </ul>
+      </nav>
+      <button class="burger" id="burger" aria-label="Open Navigation" aria-expanded="false">
+        <span class="burger__lines"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ── SLIDESHOW WRAPPER ── -->
+  <div class="slideshow" id="slideshow">
+
+    {slides.map((slide: any) => {
+      const anchorId = slide.anchorId ?? slide._id;
+      const isDark = slide.textTheme === 'dark';
+      const videoUrl = slide.video?.asset?.url;
+
+      if (slide.slideType === 'hero') return (
+        <section class={`slide slide--hero`} id={anchorId}>
+          {videoUrl ? (
+            <video autoplay loop muted playsinline preload="auto" class="slide-video">
+              <source src={videoUrl} type="video/mp4" />
+            </video>
+          ) : (
+            <video autoplay loop muted playsinline preload="auto" class="slide-video">
+              <source src="/assets/video/Cedar-Rapids-Web-Design_Hero_Video.mp4" type="video/mp4" />
+            </video>
+          )}
+          <div class="slide-video-placeholder"></div>
+          <div class="slide__content hero__content">
+            <img src="/assets/images/Cedar-Rapids-Web-Design_Logo_500-1.svg" alt="Cedar Rapids Web Design" class="hero__logo" />
+            {slide.heading && <h1 class="hero__tagline">{slide.heading}</h1>}
+            {slide.subheading && <p class="hero__sub">{slide.subheading}</p>}
+            {slide.ctas?.length > 0 && (
+              <div class="slide__ctas">
+                {slide.ctas.map((cta: any) => (
+                  <a href={cta.url} class="btn btn--outline">{cta.label}</a>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      );
+
+      if (slide.slideType === 'video-text') {
+        const overlayClass = slide.videoOverlay === 'light' ? 'slide-video-placeholder--light' : slide.videoOverlay === 'none' ? '' : 'slide-video-placeholder--dark';
+        return (
+          <section class={`slide slide--${anchorId}`} id={anchorId}>
+            {videoUrl ? (
+              <video autoplay loop muted playsinline preload="auto" class="slide-video">
+                <source src={videoUrl} type="video/mp4" />
+              </video>
+            ) : (
+              <video autoplay loop muted playsinline preload="auto" class="slide-video">
+                <source src={`/assets/video/Cedar-Rapids-Web-Design_${anchorId === 'consultation' ? 'Free-Consultation' : anchorId === 'mobile-friendly' ? 'Mobile-Friendly' : 'SEO-Video-Background'}.mp4`} type="video/mp4" />
+              </video>
+            )}
+            {overlayClass && <div class={`slide-video-placeholder ${overlayClass}`}></div>}
+            <div class={`slide__content${isDark ? ' slide__content--dark' : ''}`}>
+              <h2 class="slide__heading">{slide.heading}</h2>
+              {slide.subheading && <p class="slide__lede">{slide.subheading}</p>}
+              {slide.ctas?.length > 0 && (
+                <div class="slide__ctas">
+                  {slide.ctas.map((cta: any) => (
+                    <a href={cta.url} class={`btn ${isDark ? 'btn--outline-dark' : 'btn--outline'}`}>{cta.label}</a>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        );
+      }
+
+      if (slide.slideType === 'services') return (
+        <section class="slide slide--services" id={anchorId}>
+          <div class="slide__content slide__content--services">
+            <div class="services-header">
+              <h2 class="slide__heading">{slide.heading ?? 'Services'}</h2>
+              {slide.subheading && <p class="slide__lede">{slide.subheading}</p>}
+            </div>
+        <div class="services-grid">
+          <div class="service-card">
+            <div class="service-icon">
+              <svg viewBox="0 0 640 640" xmlns="http://www.w3.org/2000/svg">
+                <path fill="currentColor" d="M392.8 65.2C375.8 60.3 358.1 70.2 353.2 87.2L225.2 535.2C220.3 552.2 230.2 569.9 247.2 574.8C264.2 579.7 281.9 569.8 286.8 552.8L414.8 104.8C419.7 87.8 409.8 70.1 392.8 65.2zM457.4 201.3C444.9 213.8 444.9 234.1 457.4 246.6L530.8 320L457.4 393.4C444.9 405.9 444.9 426.2 457.4 438.7C469.9 451.2 490.2 451.2 502.7 438.7L598.7 342.7C611.2 330.2 611.2 309.9 598.7 297.4L502.7 201.4C490.2 188.9 469.9 188.9 457.4 201.4zM182.7 201.3C170.2 188.8 149.9 188.8 137.4 201.3L41.4 297.3C28.9 309.8 28.9 330.1 41.4 342.6L137.4 438.6C149.9 451.1 170.2 451.1 182.7 438.6C195.2 426.1 195.2 405.8 182.7 393.3L109.3 320L182.6 246.6C195.1 234.1 195.1 213.8 182.6 201.3z"/>
+              </svg>
+            </div>
+            <h3 class="service-card__heading">Web Development/Design</h3>
+            <p class="service-card__desc">Beautiful, responsive, optimized for search engines (SEO). Cedar Rapids Web Design strives to produce excellent web sites for freelancers, entrepreneurs, small business, eCommerce.</p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">
+              <svg viewBox="0 0 640 640" xmlns="http://www.w3.org/2000/svg">
+                <path fill="currentColor" d="M0 72C0 58.7 10.7 48 24 48L69.3 48C96.4 48 119.6 67.4 124.4 94L162.6 304L472.4 304C483.9 304 493.8 295.8 496 284.5L528.4 115.5C530.9 102.5 543.5 94 556.5 96.5C569.5 99 578 111.6 575.5 124.6L543.1 293.6C536.6 327.5 506.9 352 472.4 352L171.4 352L176.5 380.3C178.6 391.7 188.5 400 200.1 400L456 400C469.3 400 480 410.7 480 424C480 437.3 469.3 448 456 448L200.1 448C165.3 448 135.5 423.1 129.3 388.9L77.2 102.6C76.5 98.8 73.2 96 69.3 96L24 96C10.7 96 0 85.3 0 72zM160 528C160 501.5 181.5 480 208 480C234.5 480 256 501.5 256 528C256 554.5 234.5 576 208 576C181.5 576 160 554.5 160 528zM384 528C384 501.5 405.5 480 432 480C458.5 480 480 501.5 480 528C480 554.5 458.5 576 432 576C405.5 576 384 554.5 384 528zM319 257L247 185C237.6 175.6 237.6 160.4 247 151.1C256.4 141.8 271.6 141.7 280.9 151.1L311.9 182.1L311.9 80C311.9 66.7 322.6 56 335.9 56C349.2 56 359.9 66.7 359.9 80L359.9 182.1L390.9 151.1C400.3 141.7 415.5 141.7 424.8 151.1C434.1 160.5 434.2 175.7 424.8 185L352.8 257C343.4 266.4 328.2 266.4 318.9 257z"/>
+              </svg>
+            </div>
+            <h3 class="service-card__heading">eCommerce</h3>
+            <p class="service-card__desc">Do you have a killer product that's selling like hot-cakes and you're wondering what would happen if you started selling…online? Stop wondering and let's do this.</p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">
+              <svg viewBox="0 0 640 640" xmlns="http://www.w3.org/2000/svg">
+                <path fill="currentColor" d="M160 144C151.2 144 144 151.2 144 160L144 224C144 232.8 151.2 240 160 240L480 240C488.8 240 496 232.8 496 224L496 160C496 151.2 488.8 144 480 144L160 144zM96 160C96 124.7 124.7 96 160 96L480 96C515.3 96 544 124.7 544 160L544 224C544 259.3 515.3 288 480 288L160 288C124.7 288 96 259.3 96 224L96 160zM360 168C373.3 168 384 178.7 384 192C384 205.3 373.3 216 360 216C346.7 216 336 205.3 336 192C336 178.7 346.7 168 360 168zM416 192C416 178.7 426.7 168 440 168C453.3 168 464 178.7 464 192C464 205.3 453.3 216 440 216C426.7 216 416 205.3 416 192zM160 400C151.2 400 144 407.2 144 416L144 480C144 488.8 151.2 496 160 496L480 496C488.8 496 496 488.8 496 480L496 416C496 407.2 488.8 400 480 400L160 400zM96 416C96 380.7 124.7 352 160 352L480 352C515.3 352 544 380.7 544 416L544 480C544 515.3 515.3 544 480 544L160 544C124.7 544 96 515.3 96 480L96 416zM336 448C336 434.7 346.7 424 360 424C373.3 424 384 434.7 384 448C384 461.3 373.3 472 360 472C346.7 472 336 461.3 336 448zM440 424C453.3 424 464 434.7 464 448C464 461.3 453.3 472 440 472C426.7 472 416 461.3 416 448C416 434.7 426.7 424 440 424z"/>
+              </svg>
+            </div>
+            <h3 class="service-card__heading">Professional Hosting</h3>
+            <p class="service-card__desc">A beautiful website can be ruined by slow, unresponsive hosting. Not only is this annoying for viewers, but it also hurts your search engine ranking.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+      );
+
+      if (slide.slideType === 'portfolio') return (
+        <section class="slide slide--portfolio" id={anchorId}>
+          <div class="slide__content--dark slide__content--portfolio">
+            <div class="portfolio-header">
+              <h2 class="slide__heading">{slide.heading ?? 'Portfolio'}</h2>
+            </div>
+            <div class="portfolio-grid">
+              <a href="https://westsidesewing.com" target="_blank" rel="noopener" class="portfolio-card">
+                <img src="/assets/images/westsidesewing.webp" alt="West Side Sewing" class="portfolio-card__img" />
+                <div class="portfolio-card__overlay">Visit West Side Sewing</div>
+              </a>
+              <a href="https://cedarrapidscoworking.space" target="_blank" rel="noopener" class="portfolio-card">
+                <img src="/assets/images/thespace.webp" alt="The Space Coworking" class="portfolio-card__img" />
+                <div class="portfolio-card__overlay">Visit The Space Coworking</div>
+              </a>
+              <a href="https://roadmapwp.com" target="_blank" rel="noopener" class="portfolio-card">
+                <img src="/assets/images/roadmapwp.webp" alt="RoadMapWP" class="portfolio-card__img" />
+                <div class="portfolio-card__overlay">Visit RoadMapWP</div>
+              </a>
+              <a href="https://therepo.org" target="_blank" rel="noopener" class="portfolio-card">
+                <img src="/assets/images/thereposcreenshot.webp" alt="The Repo" class="portfolio-card__img" />
+                <div class="portfolio-card__overlay">Visit The Repo</div>
+              </a>
+              <a href="https://finnprep.com" target="_blank" rel="noopener" class="portfolio-card">
+                <img src="/assets/images/finnprep-hero.webp" alt="FinnPREP" class="portfolio-card__img" />
+                <div class="portfolio-card__overlay">Visit FinnPREP</div>
+              </a>
+              <a href="https://chromebook.guide" target="_blank" rel="noopener" class="portfolio-card">
+                <img src="/assets/images/Cedar-Rapids-Web-Design_Portfolio_Chromebook-Guide1.jpg" alt="Chromebook Guide" class="portfolio-card__img" />
+                <div class="portfolio-card__overlay">Visit Chromebook Guide</div>
+              </a>
+            </div>
+          </div>
+        </section>
+      );
+
+      if (slide.slideType === 'team') return (
+        <section class="slide slide--team" id={anchorId}>
+          <div class="slide__content slide__content--team">
+            <div class="team-grid">
+              <div class="team-card">
+                <div class="team-card__header">
+                  <img src="/assets/images/devingreen_profile-100x100-1.png" alt="Devin Green" class="team-card__photo" />
+                  <div class="team-card__info">
+                    <h3 class="team-card__name">Devin Green</h3>
+                    <p class="team-card__title">Lead Designer</p>
+                    <div class="team-card__socials">
+                      <a href="https://twitter.com/artistro08" class="team-social" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+                      <a href="https://www.facebook.com/artistro08" class="team-social" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                    </div>
+                  </div>
+                </div>
+                <div class="team-card__bio">
+                  <p>Devin loves graphic and web design. With over 11 years experience in graphic design and 7 years in web design, his preferred tools are Adobe Photoshop, Illustrator, and Webflow.</p>
+                  <p>When he's not designing, Devin works on his clothing line <a href="https://styleclothing.co/" target="_blank" rel="noopener">Style Clothing Co.</a></p>
+                  <p>Check out Devin's work at <a href="https://devingreen.me/" target="_blank" rel="noopener">devingreen.me</a></p>
+                </div>
+              </div>
+              <div class="team-card">
+                <div class="team-card__header">
+                  <img src="/assets/images/Cedar-Rapids-Web-Design_James-Welbes_profile-100x100-1.jpg" alt="James Welbes" class="team-card__photo" />
+                  <div class="team-card__info">
+                    <h3 class="team-card__name">James Welbes</h3>
+                    <p class="team-card__title">Owner / Lead Developer</p>
+                    <div class="team-card__socials">
+                      <a href="https://twitter.com/jameswelbes" class="team-social" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+                      <a href="https://linkedin.com/in/JamesWelbes" class="team-social" aria-label="LinkedIn"><i class="fa-brands fa-square-linkedin"></i></a>
+                    </div>
+                  </div>
+                </div>
+                <div class="team-card__bio">
+                  <p>James has been building websites since he was 13. Mostly WordPress, but he dabbles in Webflow, October CMS, and good old fashioned code.</p>
+                  <p>Whatever you need done, James can do it. And if he can't, he'll figure it out.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+
+      if (slide.slideType === 'contact') return (
+        <section class="slide slide--contact" id={anchorId}>
+          <div class="slide__content slide__content--contact">
+            <div class="contact-text">
+              <h2 class="slide__heading">{slide.heading ?? 'Contact Us'}</h2>
+              {slide.subheading && <p>{slide.subheading}</p>}
+              <p>The more details you provide, the more accurate our estimate will be.</p>
+              <a href={phoneUrl} class="contact__phone">{phone}</a>
+            </div>
+            <form class="contact-form" name="contact" method="POST" data-netlify="true">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="name">Name <span class="required">*</span></label>
+                  <input type="text" id="name" name="name" required placeholder="Your name" />
+                </div>
+                <div class="form-group">
+                  <label for="email">Email <span class="required">*</span></label>
+                  <input type="email" id="email" name="email" required placeholder="your@email.com" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="phone-field">Phone</label>
+                <input type="tel" id="phone-field" name="phone" placeholder="319-555-0100" />
+              </div>
+              <div class="form-group">
+                <label for="message">Tell us about your project <span class="required">*</span></label>
+                <textarea id="message" name="message" rows="5" required placeholder="Describe your project..."></textarea>
+              </div>
+              <button type="submit" class="btn btn--solid">Send Message</button>
+            </form>
+          </div>
+          <div class="contact-footer-bar">
+            <span>© 2026 Cedar Rapids Web Design · Cedar Rapids, Iowa</span>
+            <span><a href={phoneUrl}>{phone}</a> · <a href={`mailto:${settings?.email ?? 'hello@cedarrapidswebdesign.com'}`}>{settings?.email ?? 'hello@cedarrapidswebdesign.com'}</a></span>
+          </div>
+        </section>
+      );
+
+      return null;
+    })}
+
+  </div><!-- end .slideshow -->
+
+  <!-- ── MOBILE ARROWS ── -->
+  <div class="mobile-arrows">
+    <button class="mobile-arrow" id="prevBtn" aria-label="Previous slide">&#8592;</button>
+    <button class="mobile-arrow" id="nextBtn" aria-label="Next slide">&#8594;</button>
+  </div>
+
+  <!-- ── SLIDE DOTS ── -->
+  <nav class="slide-dots" id="slideDots" aria-label="Slide navigation">
+    {slides.map((slide: any, i: number) => (
+      <button class={`dot${i === 0 ? ' dot--active' : ''}`} data-slide={i} aria-label={`Slide ${i + 1}: ${slide.title}`}></button>
+    ))}
+  </nav>
+
+<script id="slide-ids-data" type="application/json" set:html={JSON.stringify(slides.map((s: any) => s.anchorId ?? s._id))}></script>
+</Layout>
+
+<style is:global>
+  /* ── RESET / BASE ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; font-family: 'Roboto', sans-serif; background: #000; color: #fff; }
+
+  /* ── HEADER ── */
+  .header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 0 2rem;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.08);
+  }
+  .header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
+  }
+  .header-logo img { height: 32px; width: auto; display: block; }
+
+  /* Nav */
+  .nav__list { list-style: none; display: flex; gap: 2rem; }
+  .nav__link {
+    color: #222;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav__link:hover { color: #e63946; }
+
+  /* Burger */
+  .burger { display: none; flex-direction: column; justify-content: center; gap: 5px; width: 36px; height: 36px; cursor: pointer; background: none; border: none; }
+  .burger__lines,
+  .burger__lines::before,
+  .burger__lines::after {
+    display: block; width: 24px; height: 2px; background: #222;
+    transition: transform 0.3s, opacity 0.3s;
+    position: relative;
+  }
+  .burger__lines::before,
+  .burger__lines::after { content: ''; position: absolute; left: 0; }
+  .burger__lines::before { top: -7px; }
+  .burger__lines::after { top: 7px; }
+  .burger[aria-expanded="true"] .burger__lines { background: transparent; }
+  .burger[aria-expanded="true"] .burger__lines::before { transform: rotate(45deg) translate(5px, 5px); }
+  .burger[aria-expanded="true"] .burger__lines::after { transform: rotate(-45deg) translate(5px, -5px); }
+
+  /* ── SLIDESHOW ── */
+  .slideshow {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  /* ── SLIDES ── */
+  .slide {
+    position: absolute;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding-top: 70px;
+    isolation: isolate;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+  }
+  .slide.slide--active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* Video bg */
+  .slide-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+  }
+  .slide-video-placeholder {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: rgba(0,0,0,0.45);
+    pointer-events: none;
+  }
+  .slide-video-placeholder--dark { background: rgba(0,0,0,0.55); }
+  .slide-video-placeholder--light { background: rgba(255,255,255,0.35); }
+
+  /* Slide content */
+  .slide__content {
+    position: relative;
+    z-index: 10;
+    max-width: 900px;
+    width: 100%;
+    padding: 2rem;
+    text-align: center;
+    color: #fff;
+  }
+  .slide__content--dark { color: #111; }
+  .slide__heading {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    margin-bottom: 1rem;
+    letter-spacing: -0.01em;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .slide__content--dark .slide__heading { text-shadow: none; }
+  .slide__lede {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    font-weight: 300;
+    line-height: 1.6;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    opacity: 0.92;
+  }
+
+  /* Hero */
+  .slide--hero { background: #0a0a14; }
+  .slide--consultation { background: #1a3a5c; }
+  .slide--mobile { background: #1a2e1a; }
+  .slide--seo { background: #e8e8e8; }
+  .hero__logo { max-width: 320px; width: 70%; margin: 0 auto 1.5rem; filter: brightness(0) invert(1); }
+  .hero__tagline { font-size: clamp(1.2rem, 3vw, 2rem); font-weight: 300; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.9; margin-bottom: 0.5rem; }
+  .hero__sub { font-size: 1rem; opacity: 0.6; margin-bottom: 2rem; }
+
+  /* CTAs */
+  .slide__ctas { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    display: inline-block;
+    padding: 0.75rem 2rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    cursor: pointer;
+  }
+  .btn--outline {
+    background: transparent;
+    border: 2px solid #fff;
+    color: #fff;
+  }
+  .btn--outline:hover { background: #fff; color: #111; }
+  .btn--solid {
+    background: #e63946;
+    border: 2px solid #e63946;
+    color: #fff;
+    font-family: 'Roboto', sans-serif;
+  }
+  .btn--solid:hover { background: #c1121f; border-color: #c1121f; }
+
+  /* ── SERVICES SLIDE ── */
+  .slide--services {
+    background: url('/assets/images/guy-on-tablet.webp') center/cover no-repeat;
+  }
+  .slide--services::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.72);
+    z-index: 1;
+  }
+  .slide__content--services {
+    z-index: 10;
+    max-width: 1100px;
+    text-align: left;
+  }
+  .services-header { margin-bottom: 2.5rem; text-align: center; }
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+  .service-card { text-align: center; padding: 1.5rem; }
+  .service-icon {
+    width: 56px; height: 56px;
+    margin: 0 auto 1.25rem;
+    color: #fff;
+  }
+  .service-icon svg { width: 100%; height: 100%; }
+  .service-card__heading { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.75rem; }
+  .service-card__desc { font-size: 0.9rem; line-height: 1.7; opacity: 0.85; }
+
+  /* ── PORTFOLIO SLIDE ── */
+  .slide--portfolio { background: white; }
+  .slide__content--portfolio { max-width: 1100px; }
+  .portfolio-header { text-align: center; margin-bottom: 2rem; }
+  .portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  .portfolio-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    display: block;
+    aspect-ratio: 16/9;
+  }
+  .portfolio-card__img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+  .portfolio-card:hover .portfolio-card__img { transform: scale(1.05); }
+  .portfolio-card__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(230,57,70,0.85);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.3s;
+    text-align: center;
+    padding: 1rem;
+  }
+  .portfolio-card:hover .portfolio-card__overlay { opacity: 1; }
+
+  /* ── TEAM SLIDE ── */
+  .slide--team { background: #f8f8f8; }
+  .slide--team .slide__content--team { color: #111; max-width: 1000px; }
+  .team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .team-card {
+    background: #fff;
+    border-radius: 6px;
+    padding: 2rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  .team-card__header { display: flex; align-items: flex-start; gap: 1.25rem; margin-bottom: 1.25rem; }
+  .team-card__photo { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+  .team-card__name { font-size: 1.2rem; font-weight: 700; color: #111; margin-bottom: 0.2rem; text-align: left;}
+  .team-card__title { font-size: 0.85rem; color: #666; margin-bottom: 0.6rem; text-align: left;}
+  .team-card__socials { display: flex; gap: 0.75rem; }
+  .team-social { color: #444; font-size: 1rem; text-decoration: none; transition: color 0.2s; }
+  .team-social:hover { color: #e63946; }
+  .team-card__bio { font-size: 0.88rem; line-height: 1.7; color: #444; text-align: left; }
+  .team-card__bio p + p { margin-top: 0.75rem; }
+  .team-card__bio a { color: #e63946; text-decoration: none; }
+  .team-card__bio a:hover { text-decoration: underline; }
+
+  /* ── CONTACT FOOTER BAR ── */
+  .slide--contact { background: #1a1a2e; }
+  .contact-footer-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 1rem 2rem;
+    background: rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.4);
+    font-family: 'Roboto', sans-serif;
+    z-index: 10;
+  }
+  .contact-footer-bar a { color: rgba(255,255,255,0.5); text-decoration: none; }
+  .contact-footer-bar a:hover { color: #e63946; }
+
+  /* ── CONTACT SLIDE CONTENT ── */
+  .slide__content--contact {
+    max-width: 1000px;
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 3rem;
+    align-items: start;
+    text-align: left;
+  }
+  .contact-text p { font-size: 0.9rem; line-height: 1.7; opacity: 0.8; margin-bottom: 0.75rem; }
+  .contact__phone {
+    display: inline-block;
+    margin-top: 1rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #e63946;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+  }
+  .contact__phone:hover { color: #ff6b6b; }
+
+  /* Form */
+  .contact-form { display: flex; flex-direction: column; gap: 1rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  .form-group label { font-size: 0.8rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; opacity: 0.8; }
+  .required { color: #e63946; }
+  .form-group input,
+  .form-group textarea {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 3px;
+    padding: 0.65rem 0.9rem;
+    color: #fff;
+    font-size: 0.9rem;
+    font-family: 'Roboto', sans-serif;
+    transition: border-color 0.2s;
+    resize: vertical;
+  }
+  .form-group input::placeholder,
+  .form-group textarea::placeholder { opacity: 0.4; }
+  .form-group input:focus,
+  .form-group textarea:focus { outline: none; border-color: #e63946; }
+
+  /* ── SLIDE DOTS ── */
+  .slide-dots {
+    position: fixed;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background-color: #000;
+    padding: .35rem;
+    border-radius: 7px;
+  }
+  .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.8);
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.3s, transform 0.2s;
+  }
+  .dot:hover { background: rgba(255,255,255,0.7); }
+  .dot--active { background: #e63946; transform: scale(1.3); }
+
+  /* ── MOBILE ARROWS ── */
+  .mobile-arrows {
+    display: none;
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 200;
+    gap: 1rem;
+  }
+  .mobile-arrow {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    transition: background 0.2s;
+  }
+  .mobile-arrow:hover { background: rgba(230,57,70,0.7); }
+
+  /* ── MOBILE NAV ── */
+  @media (max-width: 768px) {
+    .mobile-arrows { display: flex; }
+    .nav {
+      position: fixed;
+      top: 70px; left: 0; right: 0;
+      background: #fff;
+      padding: 1.5rem 2rem;
+      transform: translateY(calc(-100% - 70px));
+      transition: transform 0.3s ease;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      z-index: 99;
+    }
+    .nav.nav--open { transform: translateY(0); }
+    .nav__list { flex-direction: column; gap: 1.25rem; }
+    .burger { display: flex; }
+    .services-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+    .portfolio-grid { grid-template-columns: 1fr 1fr; }
+    .team-grid { grid-template-columns: 1fr; }
+    .slide__content--contact { grid-template-columns: 1fr; gap: 2rem; }
+    .form-row { grid-template-columns: 1fr; }
+    .slide-dots { display: none; }
+  }
+</style>
+
+<script>
+  // ── SLIDESHOW ENGINE ──
+  const slides = document.querySelectorAll<HTMLElement>('.slide');
+  const dots = document.querySelectorAll<HTMLButtonElement>('.dot');
+  let current = 0;
+  let isAnimating = false;
+  const SLIDE_COUNT = slides.length;
+
+  // Set first slide active on load
+  slides[0]?.classList.add('slide--active');
+
+  function goTo(index: number) {
+    if (isAnimating || index === current) return;
+    isAnimating = true;
+    slides[current]?.classList.remove('slide--active');
+    current = Math.max(0, Math.min(index, SLIDE_COUNT - 1));
+    slides[current]?.classList.add('slide--active');
+    dots.forEach((d, i) => d.classList.toggle('dot--active', i === current));
+    setTimeout(() => { isAnimating = false; }, 650);
+  }
+
+  // Dot clicks
+  dots.forEach(dot => {
+    dot.addEventListener('click', () => goTo(Number(dot.dataset.slide)));
+  });
+
+  // Keyboard
+  document.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1);
+  });
+
+  // Wheel / trackpad
+  let wheelCooldown = false;
+  document.addEventListener('wheel', (e: WheelEvent) => {
+    if (wheelCooldown) return;
+    wheelCooldown = true;
+    if (e.deltaX > 30 || e.deltaY > 30) goTo(current + 1);
+    if (e.deltaX < -30 || e.deltaY < -30) goTo(current - 1);
+    setTimeout(() => { wheelCooldown = false; }, 800);
+  }, { passive: true });
+
+  // Touch / swipe
+  let touchStartX = 0;
+  let touchStartY = 0;
+  document.addEventListener('touchstart', (e: TouchEvent) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchend', (e: TouchEvent) => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+      dx < 0 ? goTo(current + 1) : goTo(current - 1);
+    }
+  }, { passive: true });
+
+  // Nav anchor links
+  const slideIds = JSON.parse(document.getElementById('slide-ids-data')?.textContent ?? '[]');
+  document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', (e: Event) => {
+      const hash = (a.getAttribute('href') ?? '').replace('#', '');
+      const idx = slideIds.indexOf(hash);
+      if (idx !== -1) {
+        e.preventDefault();
+        goTo(idx);
+        // close mobile nav
+        nav.classList.remove('nav--open');
+        burger.setAttribute('aria-expanded', 'false');
+      }
+    });
+  });
+
+  // Mobile arrows
+  document.getElementById('prevBtn')?.addEventListener('click', () => goTo(current - 1));
+  document.getElementById('nextBtn')?.addEventListener('click', () => goTo(current + 1));
+
+  // ── MOBILE BURGER ──
+  const burger = document.getElementById('burger') as HTMLButtonElement;
+  const nav = document.getElementById('nav') as HTMLElement;
+  burger.addEventListener('click', () => {
+    const isOpen = burger.getAttribute('aria-expanded') === 'true';
+    burger.setAttribute('aria-expanded', String(!isOpen));
+    nav.classList.toggle('nav--open', !isOpen);
+  });
+</script>

@@ -1,0 +1,45 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getVideo } from '../../lib/sanity';
+import { PortableText } from '@portabletext/react';
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+const video = await getVideo(slug!);
+if (!video) return Astro.redirect('/videos');
+---
+
+<Layout title={`${video.title} — Cedar Rapids Web Design`} description={video.excerpt ?? ''}>
+  <article class="content-page single-post">
+    <header class="content-page__header">
+      <a href="/videos" class="back-link">← Back to Videos</a>
+      <div class="single-post__meta">
+        <span class="content-card__date">{video.publishedAt ? new Date(video.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Draft'}</span>
+      </div>
+      <h1>{video.title}</h1>
+      {video.excerpt && <p class="single-post__excerpt">{video.excerpt}</p>}
+      {video.youtubeId && (
+        <div class="video-embed">
+          <iframe
+            src={`https://www.youtube.com/embed/${video.youtubeId}`}
+            title={video.title}
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+            loading="lazy"
+          ></iframe>
+        </div>
+      )}
+    </header>
+    {video.description && (
+      <div class="single-post__body prose">
+        <PortableText value={video.description} client:load />
+      </div>
+    )}
+  </article>
+</Layout>
+
+<style is:global>
+  @import '/src/styles/content-pages.css';
+</style>

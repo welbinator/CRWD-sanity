@@ -1,0 +1,41 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getAllEpisodes, urlFor } from '../../lib/sanity';
+
+const episodes = await getAllEpisodes();
+---
+
+<Layout title="Podcast — Cedar Rapids Web Design">
+  <div class="content-page">
+    <header class="content-page__header">
+      <a href="/" class="back-link">← Back to Home</a>
+      <h1>Podcast</h1>
+      <p>Conversations about web design, development, and running a web business in the Midwest.</p>
+    </header>
+    <div class="content-grid">
+      {episodes.map((ep: any) => (
+        <a href={`/podcast/${ep.slug.current}`} class="content-card">
+          {ep.coverImage && (
+            <img src={urlFor(ep.coverImage).width(600).height(600).url()} alt={ep.coverImage.alt ?? ep.title} class="content-card__img" style="aspect-ratio:1/1;object-fit:cover;" />
+          )}
+          <div class="content-card__body">
+            <div class="content-card__meta">
+              {ep.episodeNumber && <span class="content-card__episode">Episode {ep.episodeNumber}</span>}
+              <span class="content-card__date">{ep.publishedAt ? new Date(ep.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Draft'}</span>
+            </div>
+            <h2 class="content-card__title">{ep.title}</h2>
+            {ep.excerpt && <p class="content-card__excerpt">{ep.excerpt}</p>}
+            <span class="content-card__read-more">Listen Now →</span>
+          </div>
+        </a>
+      ))}
+      {episodes.length === 0 && (
+        <p class="content-empty">No episodes yet. Check back soon!</p>
+      )}
+    </div>
+  </div>
+</Layout>
+
+<style is:global>
+  @import '/src/styles/content-pages.css';
+</style>

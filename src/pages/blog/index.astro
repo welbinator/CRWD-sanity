@@ -1,0 +1,41 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getAllPosts, urlFor } from '../../lib/sanity';
+
+const posts = await getAllPosts();
+---
+
+<Layout title="Blog — Cedar Rapids Web Design">
+  <div class="content-page">
+    <header class="content-page__header">
+      <a href="/" class="back-link">← Back to Home</a>
+      <h1>Blog</h1>
+      <p>Web design tips, news, and insights from the Cedar Rapids Web Design team.</p>
+    </header>
+    <div class="content-grid">
+      {posts.map((post: any) => (
+        <a href={`/blog/${post.slug.current}`} class="content-card">
+          {post.mainImage && (
+            <img src={urlFor(post.mainImage).width(600).height(338).url()} alt={post.mainImage.alt ?? post.title} class="content-card__img" />
+          )}
+          <div class="content-card__body">
+            <div class="content-card__meta">
+              <span class="content-card__date">{post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Draft'}</span>
+              {post.author && <span class="content-card__author">{post.author}</span>}
+            </div>
+            <h2 class="content-card__title">{post.title}</h2>
+            {post.excerpt && <p class="content-card__excerpt">{post.excerpt}</p>}
+            <span class="content-card__read-more">Read More →</span>
+          </div>
+        </a>
+      ))}
+      {posts.length === 0 && (
+        <p class="content-empty">No blog posts yet. Check back soon!</p>
+      )}
+    </div>
+  </div>
+</Layout>
+
+<style is:global>
+  @import '/src/styles/content-pages.css';
+</style>

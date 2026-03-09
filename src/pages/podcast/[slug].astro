@@ -1,0 +1,39 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getEpisode, urlFor } from '../../lib/sanity';
+import { PortableText } from '@portabletext/react';
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+const ep = await getEpisode(slug!);
+if (!ep) return Astro.redirect('/podcast');
+---
+
+<Layout title={`${ep.title} — Cedar Rapids Web Design Podcast`} description={ep.excerpt ?? ''}>
+  <article class="content-page single-post">
+    <header class="content-page__header">
+      <a href="/podcast" class="back-link">← Back to Podcast</a>
+      <div class="single-post__meta">
+        {ep.episodeNumber && <span class="content-card__episode">Episode {ep.episodeNumber}</span>}
+        <span class="content-card__date">{ep.publishedAt ? new Date(ep.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Draft'}</span>
+      </div>
+      <h1>{ep.title}</h1>
+      {ep.excerpt && <p class="single-post__excerpt">{ep.excerpt}</p>}
+      {ep.embedUrl && (
+        <div class="podcast-embed">
+          <iframe src={ep.embedUrl} width="100%" height="152" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        </div>
+      )}
+    </header>
+    {ep.description && (
+      <div class="single-post__body prose">
+        <PortableText value={ep.description} client:load />
+      </div>
+    )}
+  </article>
+</Layout>
+
+<style is:global>
+  @import '/src/styles/content-pages.css';
+</style>

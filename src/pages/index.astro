@@ -687,15 +687,20 @@ const slides = await getSlides();
   let isAnimating = false;
   const SLIDE_COUNT = slides.length;
 
-  // Set first slide active on load
+  // Set first slide active, mark others as inert (removes from tab order)
   slides[0]?.classList.add('slide--active');
+  slides.forEach((slide, i) => { if (i !== 0) (slide as HTMLElement).setAttribute('inert', ''); });
 
   function goTo(index: number) {
     if (isAnimating || index === current) return;
     isAnimating = true;
-    slides[current]?.classList.remove('slide--active');
+    const prevSlide = slides[current] as HTMLElement;
+    prevSlide?.classList.remove('slide--active');
+    prevSlide?.setAttribute('inert', '');
     current = Math.max(0, Math.min(index, SLIDE_COUNT - 1));
-    slides[current]?.classList.add('slide--active');
+    const nextSlide = slides[current] as HTMLElement;
+    nextSlide?.classList.add('slide--active');
+    nextSlide?.removeAttribute('inert');
     dots.forEach((d, i) => d.classList.toggle('dot--active', i === current));
     setTimeout(() => { isAnimating = false; }, 650);
   }
@@ -755,6 +760,17 @@ const slides = await getSlides();
   // Mobile arrows
   document.getElementById('prevBtn')?.addEventListener('click', () => goTo(current - 1));
   document.getElementById('nextBtn')?.addEventListener('click', () => goTo(current + 1));
+
+  // ── FOCUS-DRIVEN SLIDE NAVIGATION (accessibility) ──
+  // When a keyboard user tabs to a focusable element on a non-active slide,
+  // automatically jump to that slide so the screen follows focus.
+  document.getElementById('slideshow')?.addEventListener('focusin', (e: Event) => {
+    const target = e.target as HTMLElement;
+    const parentSlide = target.closest<HTMLElement>('.slide');
+    if (!parentSlide) return;
+    const idx = Array.from(slides).indexOf(parentSlide);
+    if (idx !== -1 && idx !== current) goTo(idx);
+  });
 
   // ── MOBILE BURGER ──
   const burger = document.getElementById('burger') as HTMLButtonElement;

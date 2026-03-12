@@ -677,6 +677,9 @@ const slides = await getSlides();
     .burger { display: flex; }
     .services-grid { grid-template-columns: 1fr; gap: 1.5rem; }
     .portfolio-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .portfolio-grid { grid-template-columns: 1fr; }
     .team-grid { grid-template-columns: 1fr; }
     .slide__content--contact { grid-template-columns: 1fr; gap: 2rem; }
     .form-row { grid-template-columns: 1fr; }

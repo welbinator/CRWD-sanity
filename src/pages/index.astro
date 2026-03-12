@@ -773,13 +773,19 @@ const slides = await getSlides();
     if (isAnimating || index === current) return;
     isAnimating = true;
     const prevSlide = slides[current] as HTMLElement;
+    const goingBack = index < current;
     prevSlide?.classList.remove('slide--active');
     prevSlide?.setAttribute('inert', '');
     current = Math.max(0, Math.min(index, SLIDE_COUNT - 1));
     const nextSlide = slides[current] as HTMLElement;
     nextSlide?.classList.add('slide--active');
     nextSlide?.removeAttribute('inert');
-    nextSlide.scrollTop = 0;
+    // Going forward → start at top. Going back → start at bottom.
+    if (goingBack) {
+      nextSlide.scrollTop = nextSlide.scrollHeight;
+    } else {
+      nextSlide.scrollTop = 0;
+    }
     dots.forEach((d, i) => {
       d.classList.toggle('dot--active', i === current);
       d.setAttribute('aria-pressed', String(i === current));

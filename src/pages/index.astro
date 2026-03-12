@@ -351,7 +351,8 @@ const slides = await getSlides();
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     padding-top: 70px;
     padding-inline: 30px;
     isolation: isolate;
@@ -719,6 +720,7 @@ const slides = await getSlides();
     const nextSlide = slides[current] as HTMLElement;
     nextSlide?.classList.add('slide--active');
     nextSlide?.removeAttribute('inert');
+    nextSlide.scrollTop = 0;
     dots.forEach((d, i) => {
       d.classList.toggle('dot--active', i === current);
       d.setAttribute('aria-pressed', String(i === current));
@@ -758,15 +760,61 @@ const slides = await getSlides();
     if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1);
   });
 
-  // Wheel / trackpad
-  let wheelCooldown = false;
-  document.addEventListener('wheel', (e: WheelEvent) => {
-    if (wheelCooldown) return;
-    wheelCooldown = true;
-    if (e.deltaX > 30 || e.deltaY > 30) goTo(current + 1);
-    if (e.deltaX < -30 || e.deltaY < -30) goTo(current - 1);
-    setTimeout(() => { wheelCooldown = false; }, 800);
-  }, { passive: true });
+  // ── SCROLL-BASED SLIDE ADVANCE ──
+  // Slides that have more content than fits the viewport are scrollable.
+  // When the user scrolls to the bottom of the current slide → advance to next.
+  // When at the top and scrolls up → go to previous.
+  // Slides that fit entirely in the viewport advance on any wheel intent.
+
+  let scrollCooldown = false;
+
+  function isAtBottom(el: HTMLElement): boolean {
+    return el.scrollTop + el.clientHeight >= el.scrollHeight - 4;
+  }
+
+  function isAtTop(el: HTMLElement): boolean {
+    return el.scrollTop <= 0;
+  }
+
+  // Scroll listener: fires when a scrollable slide reaches its bottom
+  function onSlideScroll(e: Event) {
+    if (scrollCooldown || isAnimating) return;
+    const el = e.currentTarget as HTMLElement;
+    if (isAtBottom(el) && current < SLIDE_COUNT - 1) {
+      scrollCooldown = true;
+      goTo(current + 1);
+      setTimeout(() => { scrollCooldown = false; }, 900);
+    }
+  }
+
+  // Wheel listener on each slide:
+  // - if slide content fits in viewport → advance immediately on wheel intent
+  // - if slide is scrollable → only advance when at the top scrolling up
+  function onSlideWheel(e: WheelEvent) {
+    if (scrollCooldown || isAnimating) return;
+    const el = e.currentTarget as HTMLElement;
+    const scrollable = el.scrollHeight > el.clientHeight + 4;
+    if (!scrollable) {
+      // No overflow — treat any wheel as intent to advance
+      scrollCooldown = true;
+      if (e.deltaY > 10) goTo(current + 1);
+      if (e.deltaY < -10) goTo(current - 1);
+      setTimeout(() => { scrollCooldown = false; }, 900);
+    } else if (isAtTop(el) && e.deltaY < -10) {
+      // Scrollable slide but at the very top, scrolling up → go back
+      scrollCooldown = true;
+      goTo(current - 1);
+      setTimeout(() => { scrollCooldown = false; }, 900);
+    }
+    // Otherwise let the browser handle scrolling within the slide
+  }
+
+  // Make all slides scrollable and attach listeners
+  slides.forEach(slide => {
+    (slide as HTMLElement).style.overflowY = 'auto';
+    slide.addEventListener('scroll', onSlideScroll, { passive: true });
+    slide.addEventListener('wheel', onSlideWheel, { passive: true });
+  });
 
   // Touch / swipe
   let touchStartX = 0;

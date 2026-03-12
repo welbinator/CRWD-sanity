@@ -760,61 +760,92 @@ const slides = await getSlides();
     if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1);
   });
 
-  // ── SCROLL-BASED SLIDE ADVANCE ──
-  // Slides that have more content than fits the viewport are scrollable.
-  // When the user scrolls to the bottom of the current slide → advance to next.
-  // When at the top and scrolls up → go to previous.
-  // Slides that fit entirely in the viewport advance on any wheel intent.
+  // ── SCROLL-BASED SLIDE ADVANCE (overscroll buffer) ──
+  // Natural scroll within each slide. Only advance/retreat once the user
+  // has overscrolled past the edge by BUFFER px — prevents accidental advances.
 
-  let scrollCooldown = false;
+  const BUFFER = 60;           // px of overscroll needed to commit
+  const SCROLL_END_DELAY = 150; // ms of no wheel → gesture ended
+  const SNAP_DURATION = 900;    // ms to lock out further advances after snap
 
-  function isAtBottom(el: HTMLElement): boolean {
-    return el.scrollTop + el.clientHeight >= el.scrollHeight - 4;
+  let overscroll = 0;
+  let isSnapping = false;
+  let scrollEndTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function getActiveEl(): HTMLElement {
+    return slides[current] as HTMLElement;
   }
 
-  function isAtTop(el: HTMLElement): boolean {
+  function atBottom(el: HTMLElement): boolean {
+    return el.scrollTop + el.clientHeight >= el.scrollHeight - 2;
+  }
+
+  function atTop(el: HTMLElement): boolean {
     return el.scrollTop <= 0;
   }
 
-  // Scroll listener: fires when a scrollable slide reaches its bottom
-  function onSlideScroll(e: Event) {
-    if (scrollCooldown || isAnimating) return;
-    const el = e.currentTarget as HTMLElement;
-    if (isAtBottom(el) && current < SLIDE_COUNT - 1) {
-      scrollCooldown = true;
-      goTo(current + 1);
-      setTimeout(() => { scrollCooldown = false; }, 900);
+  function resetOverscroll() {
+    overscroll = 0;
+    if (scrollEndTimer) clearTimeout(scrollEndTimer);
+    scrollEndTimer = null;
+  }
+
+  function snapBack() {
+    // bounce back: if overscolling down snap to bottom, up snap to top
+    const el = getActiveEl();
+    isSnapping = true;
+    if (overscroll > 0) {
+      el.scrollTop = el.scrollHeight - el.clientHeight;
+    } else {
+      el.scrollTop = 0;
+    }
+    setTimeout(() => { isSnapping = false; }, 400);
+  }
+
+  function handleWheel(e: WheelEvent) {
+    e.preventDefault();
+    if (isSnapping || isAnimating) return;
+
+    const direction = Math.sign(e.deltaY); // 1 = down, -1 = up
+    const el = getActiveEl();
+    const bottom = atBottom(el);
+    const top = atTop(el);
+
+    // Not at edge → normal scroll inside slide
+    if ((direction > 0 && !bottom) || (direction < 0 && !top)) {
+      el.scrollTop += e.deltaY;
+      resetOverscroll();
+      return;
+    }
+
+    // At edge → accumulate overscroll buffer
+    overscroll += e.deltaY;
+    const absOver = Math.abs(overscroll);
+    const overDir = Math.sign(overscroll);
+
+    if (absOver >= BUFFER && overDir === direction) {
+      // Committed — advance or retreat
+      const next = current + direction;
+      if (next >= 0 && next < SLIDE_COUNT) {
+        resetOverscroll();
+        isSnapping = true;
+        goTo(next);
+        setTimeout(() => { isSnapping = false; }, SNAP_DURATION);
+      } else {
+        snapBack();
+        resetOverscroll();
+      }
+    } else {
+      // Gesture still accumulating — wait to see if it commits
+      if (scrollEndTimer) clearTimeout(scrollEndTimer);
+      scrollEndTimer = setTimeout(() => {
+        if (Math.abs(overscroll) < BUFFER) snapBack();
+        resetOverscroll();
+      }, SCROLL_END_DELAY);
     }
   }
 
-  // Wheel listener on each slide:
-  // - if slide content fits in viewport → advance immediately on wheel intent
-  // - if slide is scrollable → only advance when at the top scrolling up
-  function onSlideWheel(e: WheelEvent) {
-    if (scrollCooldown || isAnimating) return;
-    const el = e.currentTarget as HTMLElement;
-    const scrollable = el.scrollHeight > el.clientHeight + 4;
-    if (!scrollable) {
-      // No overflow — treat any wheel as intent to advance
-      scrollCooldown = true;
-      if (e.deltaY > 10) goTo(current + 1);
-      if (e.deltaY < -10) goTo(current - 1);
-      setTimeout(() => { scrollCooldown = false; }, 900);
-    } else if (isAtTop(el) && e.deltaY < -10) {
-      // Scrollable slide but at the very top, scrolling up → go back
-      scrollCooldown = true;
-      goTo(current - 1);
-      setTimeout(() => { scrollCooldown = false; }, 900);
-    }
-    // Otherwise let the browser handle scrolling within the slide
-  }
-
-  // Make all slides scrollable and attach listeners
-  slides.forEach(slide => {
-    (slide as HTMLElement).style.overflowY = 'auto';
-    slide.addEventListener('scroll', onSlideScroll, { passive: true });
-    slide.addEventListener('wheel', onSlideWheel, { passive: true });
-  });
+  window.addEventListener('wheel', handleWheel, { passive: false });
 
   // Touch / swipe
   let touchStartX = 0;
@@ -824,10 +855,13 @@ const slides = await getSlides();
     touchStartY = e.touches[0].clientY;
   }, { passive: true });
   document.addEventListener('touchend', (e: TouchEvent) => {
+    if (isSnapping || isAnimating) return;
     const dx = e.changedTouches[0].clientX - touchStartX;
     const dy = e.changedTouches[0].clientY - touchStartY;
-    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 50) {
-      dy < 0 ? goTo(current + 1) : goTo(current - 1);
+    const el = getActiveEl();
+    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 80) {
+      if (dy < 0 && atBottom(el)) goTo(current + 1);
+      if (dy > 0 && atTop(el)) goTo(current - 1);
     }
   }, { passive: true });
 

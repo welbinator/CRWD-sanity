@@ -56,13 +56,6 @@ const slides = await getSlides();
             <img src="/assets/images/Cedar-Rapids-Web-Design_Logo_500-1.svg" alt="Cedar Rapids Web Design" class="hero__logo" fetchpriority="high" width="500" height="167" />
             {slide.heading && <h1 class="hero__tagline">{slide.heading}</h1>}
             {slide.subheading && <p class="hero__sub">{slide.subheading}</p>}
-            {slide.ctas?.length > 0 && (
-              <div class="slide__ctas">
-                {slide.ctas.map((cta: any) => (
-                  <a href={cta.url} class="btn btn--outline">{cta.label}</a>
-                ))}
-              </div>
-            )}
           </div>
         </section>
       );
@@ -455,7 +448,7 @@ const slides = await getSlides();
   .slide--consultation { background: #1a3a5c; }
   .slide--mobile { background: #1a2e1a; }
   .slide--seo { background: #e8e8e8; }
-  .hero__logo { max-width: 320px; width: 70%; margin: 0 auto 1.5rem; filter: brightness(0) invert(1); }
+  .hero__logo { max-width: 640px; width: 90%; margin: 0 auto 1.5rem; }
   .hero__tagline { font-size: clamp(1.2rem, 3vw, 2rem); font-weight: 300; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.9; margin-bottom: 0.5rem; }
   .hero__sub { font-size: 1rem; opacity: 0.6; margin-bottom: 2rem; }
 

@@ -489,17 +489,13 @@ const slides = await getSlides();
 
   /* ── SERVICES SLIDE ── */
   .slide--services {
-    background: url('/assets/images/guy-on-tablet.webp') center/cover no-repeat;
+    background: #111;
     align-items: flex-start;
     padding-top: 90px;
     padding-bottom: 2rem;
   }
   .slide--services::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.78);
-    z-index: 1;
+    display: none;
   }
   .slide__content--services {
     z-index: 10;

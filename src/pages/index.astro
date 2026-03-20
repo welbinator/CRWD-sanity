@@ -308,7 +308,7 @@ const slides = await getSlides();
 <script id="slide-ids-data" type="application/json" set:html={JSON.stringify(slides.map((s: any) => s.anchorId ?? s._id))}></script>
 </Layout>
 
-<style is:global is:inline>
+<style is:global>
   /* ── RESET / BASE ── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; overflow: hidden; font-family: 'Roboto', sans-serif; background: #000; color: #fff; }

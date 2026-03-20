@@ -746,8 +746,9 @@ const slides = await getSlides();
     .portfolio-grid { grid-template-columns: 1fr; }
     .team-grid { grid-template-columns: 1fr; }
     .slide__content--contact { grid-template-columns: 1fr; gap: 2rem; }
-    .slide--contact { padding-bottom: 2rem; }
-    .contact-footer-bar { position: relative; bottom: auto; left: auto; right: auto; margin-top: 2rem; border-radius: 8px; }
+    .slide--contact { padding-bottom: 2rem; flex-direction: column; justify-content: flex-start; }
+    .slide__content--contact { flex: 1; }
+    .contact-footer-bar { position: relative; bottom: auto; left: auto; right: auto; width: 100%; margin-top: auto; padding: 1rem; }
     .form-row { grid-template-columns: 1fr; }
     .slide-dots { display: none; }
 

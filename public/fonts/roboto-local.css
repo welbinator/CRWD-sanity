@@ -1,0 +1,8 @@
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 300 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(/fonts/roboto.woff2) format('woff2');
+}

@@ -2,11 +2,16 @@
 interface Props {
   title?: string;
   description?: string;
+  cssHref?: string;
 }
 const {
   title = "Cedar Rapids Web Design",
   description = "Beautiful, responsive, SEO-optimized websites for small businesses in Cedar Rapids, Iowa.",
 } = Astro.props;
+
+// Find the built CSS file so we can preload it
+const cssFiles = import.meta.glob('/dist/client/_astro/*.css', { eager: true, query: '?url', import: 'default' });
+const cssHref = Object.values(cssFiles)[0] as string | undefined;
 ---
 
 <!doctype html>
@@ -17,8 +22,10 @@ const {
     <meta name="description" content={description} />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href="/assets/images/Cedar-Rapids-Web-Design_Logo_300x40.svg" />
-    <!-- Self-hosted Roboto: preload the woff2 so it's fetched in parallel with HTML -->
+    <!-- Preload self-hosted Roboto -->
     <link rel="preload" href="/fonts/roboto.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- Preload the main CSS so it's fetched in parallel with HTML -->
+    {cssHref && <link rel="preload" href={cssHref} as="style" />}
     <style>
       @font-face {
         font-family: 'Roboto';

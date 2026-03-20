@@ -493,7 +493,7 @@ const slides = await getSlides();
   /* ── SERVICES SLIDE ── */
   .slide--services {
     background: #111;
-    align-items: center;
+    align-items: flex-start;
     padding-top: 90px;
     padding-bottom: 2rem;
   }
@@ -725,7 +725,7 @@ const slides = await getSlides();
 
   /* ── MOBILE NAV ── */
   @media (max-width: 768px) {
-    .slide--services, .slide--portfolio, .slide--team, .slide--contact { align-items: flex-start; }
+    .slide--portfolio, .slide--team, .slide--contact { align-items: flex-start; }
     .mobile-arrows { display: flex; }
     .nav {
       position: fixed;
